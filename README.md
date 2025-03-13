@@ -35,7 +35,7 @@ The implementation uses a multi-phase approach:
 
 ```python
 # Import the module
-from Judrajim import factor_number
+from factorize import factor_number
 
 # Factor a number
 n = 1000000007
