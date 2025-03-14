@@ -1,9 +1,5 @@
 import math
-
-# Define the number to factorize
-
-n = int(1e10)+69420
-a = 2.5  # Weight for the fallback range width
+from collections import Counter
 
 def sieve_of_atkin(limit):
     """
@@ -233,7 +229,6 @@ def factor_number(n):
     range_width = sqrt_n // a
     
     # Use Sieve of Atkin for initial prime generation
-    print(cbrt_n)
     try:
         primes = sieve_of_atkin(cbrt_n)
     except:
@@ -260,21 +255,34 @@ def factor_number(n):
     # If no factors found, try the fallback strategy
     if len(factors) == 0:
         print("Initiating fallback strategy - searching around sqrt(n)")
-        fallback_primes = primes_in_range(int(sqrt_n - range_width), int(sqrt_n + range_width))
-        print(f"Fallback primes in range: {len(fallback_primes)}")
-        
+        fallback_widths = [n**0.999, n**0.9, n**0.5, n**0.3, 1000, 500, 200, 100, 50, 20, 10, 7.5, 6, 5, 4, 4.75, 4.5, 4.25, 3, 2.75, 2.5, 2.25, 2]  # Different width multipliers to try
         fallback_checked = 0
-        for prime in fallback_primes:
-            fallback_checked += 1
-            if prime * prime > n:
+        prev_range = sqrt_n
+        for width_multiplier in fallback_widths:
+            range_width = sqrt_n // width_multiplier
+            print(f"Trying fallback with width multiplier {width_multiplier}")
+            fallback_primes = primes_in_range(int(sqrt_n - range_width), int(prev_range))
+            print(f"Fallback primes in range: {len(fallback_primes)}")
+            
+            old_n = n  # To check if we made progress
+            phase_checked = 0
+            for prime in fallback_primes:
+                phase_checked += 1
+                if prime * prime > n:
+                    break
+                    
+                while n % prime == 0:
+                    factors.append(prime)
+                    n //= prime
+            
+            fallback_checked += phase_checked
+            print(f"Primes checked with multiplier {width_multiplier}: {phase_checked}")
+            prev_range = sqrt_n - range_width
+            if n != old_n:  # If we found factors, break the loop
                 break
-                
-            while n % prime == 0:
-                factors.append(prime)
-                n //= prime
         
         total_primes_checked += fallback_checked
-        print(f"Fallback primes checked: {fallback_checked}")
+        print(f"Total fallback primes checked: {fallback_checked}")
     
     # If we still have a large remainder, continue factoring with dynamic limits
     dynamic_checked = 0
@@ -347,9 +355,42 @@ def factor_number(n):
     print(f"Total primes checked across all phases: {total_primes_checked}")
     return factors
 
+def print_factors(factors):
+    """Prints a list of factors, using exponents for repeated factors.
+
+    Args:
+        factors: A list of integer factors (ideally prime factors).
+    """
+
+    if not factors:
+        print("1")  # Handle the case of an empty list (e.g., factorizing 1)
+        return
+
+    # Use Counter to count the occurrences of each factor
+    factor_counts = Counter(factors)
+
+    output_parts = []
+    for factor, count in factor_counts.items():
+        if count > 1:
+            output_parts.append(f"{factor}^{count}")
+        else:
+            output_parts.append(str(factor))
+
+    print(" * ".join(output_parts))
+
 # Run the factorization
 import timeit
+import random
+# n = 1000000016000000063
+# n = 100000000000001300000000000004209
+# n = random.randint(int(1e20), int(1e30))
+# n = 19284928471927379
+# n = 3000
+n = 123456789987654321
+a = 2.5  # Weight for the fallback range width
+print(f"Factoring: {n}")
 start_time = timeit.default_timer()
 factors = factor_number(n)
-print('*'.join(map(str, factors)))
-print(timeit.default_timer()-start_time)
+print("Factored into:")
+print_factors(factors)
+print(f"Time taken: {timeit.default_timer()-start_time:.5f} seconds")
