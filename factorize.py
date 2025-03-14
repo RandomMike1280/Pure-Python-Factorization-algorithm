@@ -203,8 +203,7 @@ def factor_number(n):
     
     # Special case for small numbers
     if n < 5_000_000:
-        sqrt_n = int(math.sqrt(n))
-        primes = segmented_sieve(sqrt_n)
+        primes = segmented_sieve(n)
         
         for prime in primes:
             total_primes_checked += 1
@@ -386,7 +385,7 @@ import random
 # n = random.randint(int(1e20), int(1e30))
 # n = 19284928471927379
 # n = 3000
-n = 123456789987654321
+n = 8
 a = 2.5  # Weight for the fallback range width
 print(f"Factoring: {n}")
 start_time = timeit.default_timer()
